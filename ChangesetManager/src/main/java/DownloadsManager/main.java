@@ -7,9 +7,9 @@ public class main {
 
 	public static void main (String[] args)  {
 	
-		String folderLocationLGD = "/Users/Sidra/Documents/LGD/Changesets/", 
+		String folderLocationLGD = "LGDChangesets/", 
 				folderURLLGD = "http://downloads.linkedgeodata.org/releases/2011-04-06/",
-				folderLocationDBP = "/Users/Sidra/Documents/DBPedia/Changesets/", 
+				folderLocationDBP = "DBPChangesets/", 
 				folderURLDBP = "http://live.dbpedia.org/changesets/2014/11/12/07/";
 
 		LGDDownloader.downloadFolderLGDMain(folderURLLGD, folderLocationLGD);
@@ -17,6 +17,6 @@ public class main {
 
 		DBPReleases.checkReleasesDBPMain(folderURLDBP, folderLocationDBP, folderLocationDBP + "History");
 		LGDReleases.checkReleasesLGDMain(folderURLLGD, folderLocationLGD, folderLocationLGD + "History");
-	}
+		}
 
 }
