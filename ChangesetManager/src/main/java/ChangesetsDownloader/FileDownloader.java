@@ -1,6 +1,5 @@
 package ChangesetsDownloader;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,18 +9,19 @@ import java.net.URL;
 
 public class FileDownloader {
 
-	public static boolean downloadFile(String fileURL, String folderPath) {
+	public static boolean downloadFile(String fileURL, String folderPath, String sequenceNo) {
 		try {
 			int lastSlashPos = fileURL.lastIndexOf("/");
 			if (lastSlashPos < 0)
 				return false;
 
-			File parentFolder = new File(folderPath);
-			if (parentFolder != null)
-				parentFolder.mkdirs();
-			String fullFileName = folderPath + fileURL.substring(lastSlashPos + 1);
+//			File parentFolder = new File(folderPath);
+//			if (parentFolder != null)
+//				parentFolder.mkdirs();
+			String fullFileName = folderPath + sequenceNo + "-" + fileURL.substring(lastSlashPos + 1);
 
 			URL u = new URL(fileURL);
+			
 			InputStream is = u.openStream();
 			FileOutputStream output = new FileOutputStream(fullFileName);
 
@@ -36,14 +36,14 @@ public class FileDownloader {
 			is.close();
 
 			System.out.println(fileURL + ": File downloaded successfully");
-			FileDecompressor.decompressZipFile(fullFileName);
+			FileDecompressor.decompressZipFile(fullFileName, sequenceNo);
 			
 		} catch (MalformedURLException mue) {
 			System.out.println("File cannot be downloaded" + mue);
 			return false;
 
 		} catch (InterruptedIOException iioe){
-			System.out.println("File cannot be downloaded iioe" + iioe);
+			System.out.println("File cannot be downloaded" + iioe);
 			return false;
 		}catch (IOException ioe) {
 			System.out.println("File cannot be downloaded" + ioe);
