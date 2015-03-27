@@ -97,12 +97,12 @@ public class FileDecompressor {
 	
 	public static boolean decompressTarBzipFile(String filename, String sequenceNo) {
 
-		try {
+		try {						
 			int lastDotPosition = filename.lastIndexOf(".");
 			String outFilename = filename.substring(0, lastDotPosition);
 			
 			lastDotPosition = outFilename.lastIndexOf(".");
-			outFilename = outFilename.substring(0, lastDotPosition) + "-";
+			outFilename = outFilename.substring(0, lastDotPosition);
 			int initialSequenceNo = -1; 
 
 			FileInputStream inStream = new FileInputStream(filename);
@@ -112,7 +112,7 @@ public class FileDecompressor {
 
 			TarArchiveEntry entry = null;
 			while ((entry = (TarArchiveEntry) tarIn.getNextEntry()) != null) {
-				String newFilename = outFilename + initialSequenceNo;; // = outFilename + entry.getName();
+				String newFilename = outFilename + "-" + initialSequenceNo;; // = outFilename + entry.getName();
 				
 				if (entry.isDirectory()) {
 					initialSequenceNo = initialSequenceNo + 1;
@@ -129,6 +129,7 @@ public class FileDecompressor {
 							outStream.write(data, 0, size);
 						}					
 						outStream.close();
+						LGDDownloader.setTarFilename(outFilename, newFilename);
 					}
 				}
 			}
@@ -151,7 +152,7 @@ public class FileDecompressor {
 			String outFilename = filename.substring(0, lastDotPosition);
 			
 			lastDotPosition = outFilename.lastIndexOf(".");
-			outFilename = outFilename.substring(0, lastDotPosition) + "-";
+			outFilename = outFilename.substring(0, lastDotPosition);
 			int initialSequenceNo = -1; 
 			
 			FileInputStream inStream = new FileInputStream(filename);
@@ -161,7 +162,7 @@ public class FileDecompressor {
 			TarArchiveEntry entry = null;
 
 			while ((entry = (TarArchiveEntry) tarIn.getNextEntry()) != null) {
-				String newFilename = outFilename + initialSequenceNo;; // = outFilename + entry.getName();
+				String newFilename = outFilename + "-" + initialSequenceNo;; // = outFilename + entry.getName();
 
 				if (entry.isDirectory()) {
 					initialSequenceNo = initialSequenceNo + 1;
@@ -180,6 +181,7 @@ public class FileDecompressor {
 							outStream.write(data, 0, size);
 						}
 						outStream.close();
+						LGDDownloader.setTarFilename(outFilename, newFilename);
 					}
 				}
 			}

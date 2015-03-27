@@ -16,35 +16,42 @@ import DownloadsManager.DownloadsRecorder;
 
 public class DBPDownloader extends FileDownloader{
 
-	String lastSequenceNumber = "", folderURL = "";
+	String lastSequenceNumber = "";
+	String folderURL = "";
 	List<String> url = new ArrayList<String>();
 	List<String> date = new ArrayList<String>();
-	List<String> filename = new ArrayList<String>();
+	List<String> orgFilename = new ArrayList<String>();
+	List<String> modFilename = new ArrayList<String>();
 	int noOfDownloads = 0;
 
-	public void downloadFolderDBP(String srcFolderURL, String orgDestFolderLocation) {		
+	public boolean downloadFolderDBP(String srcFolderURL, String orgDestFolderLocation) {	
 		File theDir = new File(orgDestFolderLocation);
 		if (!theDir.exists())
 			theDir.mkdir();
 
-		File configFile = new File(orgDestFolderLocation +"Config");
-		if (!configFile.exists())
-			lastSequenceNumber = "0";
-		else	
-		{
-			lastSequenceNumber = DownloadsRecorder.getLastSequenceNo(orgDestFolderLocation +"Config");	
-			folderURL = DownloadsRecorder.getFolderURL(orgDestFolderLocation +"Config");	
-		}
-		boolean downloaded = downloadFolder(srcFolderURL, orgDestFolderLocation);
+//		File configFile = 
+				new File(orgDestFolderLocation +"Config");
+//		if (!configFile.exists())
+//			lastSequenceNumber = "0";
+//		else	
+//		{
+//			lastSequenceNumber = DownloadsRecorder.getLastSequenceNo(orgDestFolderLocation +"Config");	
+//			folderURL = DownloadsRecorder.getFolderURL(orgDestFolderLocation +"Config");	
+//		}
+		boolean downloaded = downloadFolder(srcFolderURL, orgDestFolderLocation, "0");
 		if (downloaded)
 		{
 			DownloadsRecorder.saveDownloadsRecord(orgDestFolderLocation+"Config", new Date(), lastSequenceNumber, folderURL);
-			DownloadsIndex.createIndex(orgDestFolderLocation + "index.xml", url, date, filename, noOfDownloads);
-		}	
+//			DownloadsIndex.addInIndex(orgDestFolderLocation + "index.xml", url, date, orgFilename, modFilename, noOfDownloads);
+
+		}
+
+			return downloaded;
 	}
 	
-	public boolean downloadFolder(String srcFolderURL, String orgDestFolderLocation) {
+	public boolean downloadFolder(String srcFolderURL, String orgDestFolderLocation, String depth) {
 		boolean downloaded = true;
+		int breadth = 0;
 
 		try {
 				Document doc = Jsoup.connect(srcFolderURL).get();
@@ -69,31 +76,56 @@ public class DBPDownloader extends FileDownloader{
 //								File theDir = new File(newDestFolderLocation);
 //								if (!theDir.exists())
 //									theDir.mkdir();
-								if (folderURL != "")		
-								{
-									int lastSequenceNo = Integer.parseInt(lastSequenceNumber) + 1;
-									
-									StringBuilder seqNo = new StringBuilder();
-									seqNo.append(lastSequenceNo);									
-									
-									lastSequenceNumber = seqNo.toString();
-								}
-								downloadFolder(fileURL, orgDestFolderLocation);
-							} else {								
-								FileDownloader.downloadFile(fileURL, orgDestFolderLocation, lastSequenceNumber);
 								
+//								if (folderURL != "")		
+//								{
+//									int lastSequenceNo = Integer.parseInt(lastSequenceNumber) + 1;
+//									
+//									StringBuilder seqNo = new StringBuilder();
+//									seqNo.append(lastSequenceNo);									
+//									
+//									lastSequenceNumber = seqNo.toString();
+//								}
+								lastSequenceNumber = depth + "-" + breadth;
+								downloaded = downloadFolder(fileURL, orgDestFolderLocation, lastSequenceNumber);								
+								breadth++;
+							} else {	
+								lastSequenceNumber = depth + "-" + breadth;
+								FileDownloader.downloadFile(fileURL, orgDestFolderLocation,  lastSequenceNumber);
+//								System.out.println("download file =  "+lastSequenceNumber);
 								folderURL = srcFolderURL;
 								
 								url.add(fileURL);
 								date.add(new Date().toString());
-								filename.add(title);
+								orgFilename.add(title);
+								
+								int lastSlashPos = fileURL.lastIndexOf("/");
+								if (lastSlashPos < 0)
+									return false;
+
+								String modFileName = lastSequenceNumber + "-" + fileURL.substring(lastSlashPos + 1);
+								modFilename.add(modFileName);
 								noOfDownloads++;
 							}
 						} 
-				}				
+				}					
 		} catch (IOException ioe) {
 			System.out.println("Folder cannot be downloaded" + ioe);
 			downloaded = false;
+		}
+		if (downloaded)
+		{
+//			File indexFile = new File(orgDestFolderLocation + "index");
+//			if (!indexFile.exists())
+//				DownloadsIndex.createIndex(orgDestFolderLocation + "index.xml", url, date, orgFilename, modFilename, noOfDownloads);
+//			else	
+				DownloadsIndex.addInIndex(orgDestFolderLocation, url, date, orgFilename, modFilename, noOfDownloads);
+				
+			url.clear();
+			date.clear();
+			orgFilename.clear();
+			modFilename.clear();
+			noOfDownloads = 0;
 		}
 		return downloaded;
 		}
